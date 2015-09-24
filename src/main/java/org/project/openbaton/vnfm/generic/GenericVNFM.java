@@ -103,8 +103,8 @@ public class GenericVNFM extends AbstractVnfmSpringJMS {
     }
 
     @Override
-    public NFVMessage handleError(VirtualNetworkFunctionRecord virtualNetworkFunctionRecord) {
-        return null;
+    public void handleError(VirtualNetworkFunctionRecord virtualNetworkFunctionRecord) {
+
     }
 
     @Override
@@ -118,7 +118,7 @@ public class GenericVNFM extends AbstractVnfmSpringJMS {
     }
 
     @Override
-    protected VirtualNetworkFunctionRecord start(VirtualNetworkFunctionRecord virtualNetworkFunctionRecord) {
+    public VirtualNetworkFunctionRecord start(VirtualNetworkFunctionRecord virtualNetworkFunctionRecord) {
         log.debug("Starting vnfr: " + virtualNetworkFunctionRecord.getName());
         return virtualNetworkFunctionRecord;
     }
