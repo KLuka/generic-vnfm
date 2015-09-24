@@ -195,6 +195,7 @@ public abstract class AbstractVnfm implements VNFLifecycleManagement, VNFLifecyc
         }catch (Exception e){
             //TODO send the error to the nfvo?
             log.error("FATAL ERROR or unchecked exception",e);
+            vnfmHelper.sendToNfvo(VnfmUtils.getNfvMessage(Action.ERROR, virtualNetworkFunctionRecord));
         }
     }
 
@@ -289,7 +290,7 @@ public abstract class AbstractVnfm implements VNFLifecycleManagement, VNFLifecyc
             return virtualNetworkFunctionRecord;
     }
 
-    protected abstract VirtualNetworkFunctionRecord start(VirtualNetworkFunctionRecord virtualNetworkFunctionRecord) ;
+    public abstract VirtualNetworkFunctionRecord start(VirtualNetworkFunctionRecord virtualNetworkFunctionRecord) ;
 
 //    protected abstract void sendToNfvo(final NFVMessage coreMessage);
 
