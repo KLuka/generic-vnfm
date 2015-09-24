@@ -67,19 +67,11 @@ public abstract class AbstractVnfmSpringJMS extends AbstractVnfm implements Mess
         try {
             msg = (NFVMessage) ((ObjectMessage) message).getObject();
         } catch (JMSException e) {
-            e.printStackTrace();
-            System.exit(1);
+            log.error("OnMessage AbstractVnfmSpringJMS",e);
+            //System.exit(1);
         }
         log.trace("VNFM: received " + msg);
-        try {
-            this.onAction(msg);
-        } catch (NotFoundException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        } catch (BadFormatException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
+        this.onAction(msg);
     }
 
     @Override

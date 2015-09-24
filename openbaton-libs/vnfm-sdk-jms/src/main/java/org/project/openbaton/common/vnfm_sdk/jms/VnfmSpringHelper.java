@@ -16,6 +16,7 @@ import org.project.openbaton.catalogue.nfvo.Script;
 import org.project.openbaton.catalogue.nfvo.messages.Interfaces.NFVMessage;
 import org.project.openbaton.catalogue.nfvo.messages.OrVnfmGenericMessage;
 import org.project.openbaton.common.vnfm_sdk.VnfmHelper;
+import org.project.openbaton.common.vnfm_sdk.exception.EmsException;
 import org.project.openbaton.common.vnfm_sdk.exception.VnfmSdkException;
 import org.project.openbaton.common.vnfm_sdk.utils.VnfmUtils;
 import org.slf4j.Logger;
@@ -147,12 +148,17 @@ public class VnfmSpringHelper extends VnfmHelper {
         sendMessageToQueue(nfvoQueue, nfvMessage);
     }
 
-    private String executeActionOnEMS(String vduHostname, String command) throws Exception {
+    private String executeActionOnEMS(String vduHostname, String command) throws VnfmSdkException {
         log.trace("Sending message: " + command + " to " + vduHostname);
         this.sendMessageToQueue("vnfm-" + vduHostname + "-actions", command);
 
         log.info("Waiting answer from EMS - " + vduHostname);
-        String response = receiveTextFromQueue(vduHostname + "-vnfm-actions");
+        String response = null;
+        try {
+            response = receiveTextFromQueue(vduHostname + "-vnfm-actions");
+        } catch (JMSException e) {
+            throw new VnfmSdkException("Failed receive from EMS",e);
+        }
 
         log.debug("Received from EMS (" + vduHostname + "): " + response);
 
@@ -163,21 +169,16 @@ public class VnfmSpringHelper extends VnfmHelper {
         JsonObject jsonObject = parser.fromJson(response, JsonObject.class);
 
         if (jsonObject.get("status").getAsInt() == 0) {
-            try {
-                log.debug("Output from EMS (" + vduHostname + ") is: " + jsonObject.get("output"));
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw e;
-            }
+            log.debug("Output from EMS (" + vduHostname + ") is: " + jsonObject.get("output"));
         } else {
             log.error(jsonObject.get("err").getAsString());
-            throw new VnfmSdkException("EMS (" + vduHostname + ") had the following error: " + jsonObject.get("err").getAsString());
+            throw new EmsException("EMS (" + vduHostname + ") had the following error: " + jsonObject.get("err").getAsString());
         }
         return response;
     }
 
     @Override
-    public Iterable<String> executeScriptsForEvent(VirtualNetworkFunctionRecord virtualNetworkFunctionRecord, Event event, Map<String, String> env) throws Exception {//TODO make it parallel
+    public Iterable<String> executeScriptsForEvent(VirtualNetworkFunctionRecord virtualNetworkFunctionRecord, Event event, Map<String, String> env) throws VnfmSdkException {//TODO make it parallel
         LinkedList<String> res = new LinkedList<>();
         LifecycleEvent le = VnfmUtils.getLifecycleEvent(virtualNetworkFunctionRecord.getLifecycle_event(), event);
         if (le != null) {
@@ -198,7 +199,7 @@ public class VnfmSpringHelper extends VnfmHelper {
     }
 
     @Override
-    public String executeScriptsForEvent(VirtualNetworkFunctionRecord virtualNetworkFunctionRecord, Event event, VNFRecordDependency dependency) throws Exception {
+    public String executeScriptsForEvent(VirtualNetworkFunctionRecord virtualNetworkFunctionRecord, Event event, VNFRecordDependency dependency) throws VnfmSdkException {
         LifecycleEvent le = VnfmUtils.getLifecycleEvent(virtualNetworkFunctionRecord.getLifecycle_event(), event);
         if (le != null) {
             for (String script : le.getLifecycle_events()) {
@@ -237,7 +238,7 @@ public class VnfmSpringHelper extends VnfmHelper {
     }
 
     @Override
-    public void saveScriptOnEms(VirtualNetworkFunctionRecord virtualNetworkFunctionRecord, Object scripts) throws Exception {
+    public void saveScriptOnEms(VirtualNetworkFunctionRecord virtualNetworkFunctionRecord, Object scripts) throws VnfmSdkException {
 
         log.debug("Scripts are: " + scripts.getClass().getName());
 

@@ -5,9 +5,9 @@ import org.project.openbaton.catalogue.mano.common.Event;
 import org.project.openbaton.catalogue.mano.record.VNFRecordDependency;
 import org.project.openbaton.catalogue.mano.record.VirtualNetworkFunctionRecord;
 import org.project.openbaton.catalogue.nfvo.ConfigurationParameter;
-import org.project.openbaton.catalogue.nfvo.CoreMessage;
 import org.project.openbaton.catalogue.nfvo.DependencyParameters;
 import org.project.openbaton.catalogue.nfvo.messages.Interfaces.NFVMessage;
+import org.project.openbaton.common.vnfm_sdk.exception.VnfmSdkException;
 import org.project.openbaton.common.vnfm_sdk.jms.AbstractVnfmSpringJMS;
 import org.project.openbaton.common.vnfm_sdk.utils.VnfmUtils;
 import org.project.openbaton.vnfm.generic.utils.EmsRegistrator;
@@ -29,7 +29,7 @@ public class GenericVNFM extends AbstractVnfmSpringJMS {
     }
 
     @Override
-    public VirtualNetworkFunctionRecord instantiate(VirtualNetworkFunctionRecord virtualNetworkFunctionRecord, Object scripts) throws Exception {
+    public VirtualNetworkFunctionRecord instantiate(VirtualNetworkFunctionRecord virtualNetworkFunctionRecord, Object scripts) throws VnfmSdkException {
 
         log.info("Instantiation of VirtualNetworkFunctionRecord " + virtualNetworkFunctionRecord.getName());
 
@@ -75,7 +75,7 @@ public class GenericVNFM extends AbstractVnfmSpringJMS {
     }
 
     @Override
-    public VirtualNetworkFunctionRecord modify(VirtualNetworkFunctionRecord virtualNetworkFunctionRecord, VNFRecordDependency dependency) throws Exception {
+    public VirtualNetworkFunctionRecord modify(VirtualNetworkFunctionRecord virtualNetworkFunctionRecord, VNFRecordDependency dependency) throws VnfmSdkException {
         log.debug("VirtualNetworkFunctionRecord VERSION is: " + virtualNetworkFunctionRecord.getHb_version());
         log.debug("VirtualNetworkFunctionRecord NAME is: " + virtualNetworkFunctionRecord.getName());
         log.debug("Got dependency: " + dependency);
@@ -96,7 +96,7 @@ public class GenericVNFM extends AbstractVnfmSpringJMS {
     //When the EMS reveive a script which terminate the vnf, the EMS is still running.
     //Once the vnf is terminated NFVO requests deletion of resources (MANO B.5) and the EMS will be terminated.
     @Override
-    public VirtualNetworkFunctionRecord terminate(VirtualNetworkFunctionRecord virtualNetworkFunctionRecord) throws Exception {
+    public VirtualNetworkFunctionRecord terminate(VirtualNetworkFunctionRecord virtualNetworkFunctionRecord) throws VnfmSdkException {
         log.debug("Termination of VNF: "+virtualNetworkFunctionRecord.getName());
         log.info("Executed script: " + vnfmHelper.executeScriptsForEvent(virtualNetworkFunctionRecord, Event.TERMINATE, getMap(virtualNetworkFunctionRecord)));
         return virtualNetworkFunctionRecord;
@@ -118,20 +118,17 @@ public class GenericVNFM extends AbstractVnfmSpringJMS {
     }
 
     @Override
-    protected VirtualNetworkFunctionRecord start(VirtualNetworkFunctionRecord virtualNetworkFunctionRecord) throws Exception {
+    protected VirtualNetworkFunctionRecord start(VirtualNetworkFunctionRecord virtualNetworkFunctionRecord) {
         log.debug("Starting vnfr: " + virtualNetworkFunctionRecord.getName());
         return virtualNetworkFunctionRecord;
     }
 
-    @Override
-    protected VirtualNetworkFunctionRecord configure(VirtualNetworkFunctionRecord virtualNetworkFunctionRecord) throws Exception {
-        return virtualNetworkFunctionRecord;
-    }
 
     @Override
-    public void NotifyChange() {
+    public void notifyChange() {
 
     }
+
 
     @Override
     protected void checkEmsStarted(String hostname) {

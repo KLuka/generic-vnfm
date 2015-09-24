@@ -23,9 +23,9 @@ public abstract class VnfmHelper {
 
     public abstract void sendToNfvo(NFVMessage nfvMessage);
 
-    public abstract Iterable<String> executeScriptsForEvent(VirtualNetworkFunctionRecord virtualNetworkFunctionRecord, Event event, Map<String, String> env) throws Exception;
+    public abstract Iterable<String> executeScriptsForEvent(VirtualNetworkFunctionRecord virtualNetworkFunctionRecord, Event event, Map<String, String> env) throws VnfmSdkException;
 
-    public abstract String executeScriptsForEvent(VirtualNetworkFunctionRecord virtualNetworkFunctionRecord, Event event, VNFRecordDependency dependency) throws Exception;
+    public abstract String executeScriptsForEvent(VirtualNetworkFunctionRecord virtualNetworkFunctionRecord, Event event, VNFRecordDependency dependency) throws VnfmSdkException;
 
-    public abstract void saveScriptOnEms(VirtualNetworkFunctionRecord virtualNetworkFunctionRecord, Object scriptsLink) throws Exception;
+    public abstract void saveScriptOnEms(VirtualNetworkFunctionRecord virtualNetworkFunctionRecord, Object scriptsLink) throws VnfmSdkException;
 }
